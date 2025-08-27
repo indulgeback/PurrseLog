@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
 import '../models/expense.dart';
 import '../services/storage_service.dart';
 import 'add_expense_screen.dart';
@@ -11,14 +12,32 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   List<Expense> expenses = [];
   bool isLoading = true;
+  DateTime _focusedDay = DateTime.now();
+  DateTime _selectedDay = DateTime.now();
+  CalendarFormat _calendarFormat = CalendarFormat.week;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
     _loadExpenses();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadExpenses() async {
@@ -27,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
       expenses = loadedExpenses;
       isLoading = false;
     });
+    _animationController.forward();
   }
 
   Future<void> _deleteExpense(String id) async {
@@ -52,11 +72,169 @@ class _HomeScreenState extends State<HomeScreen> {
         .fold(0.0, (sum, expense) => sum + expense.amount);
   }
 
-  Widget _buildSummaryCard() {
+  List<Expense> _getExpensesForDay(DateTime day) {
+    return expenses.where((expense) {
+      return isSameDay(expense.date, day);
+    }).toList();
+  }
+
+  double _getDayIncome(DateTime day) {
+    return _getExpensesForDay(day)
+        .where((expense) => expense.isIncome)
+        .fold(0.0, (sum, expense) => sum + expense.amount);
+  }
+
+  double _getDayExpense(DateTime day) {
+    return _getExpensesForDay(day)
+        .where((expense) => !expense.isIncome)
+        .fold(0.0, (sum, expense) => sum + expense.amount);
+  }
+
+  double _getWeekIncome() {
+    final weekStart = _selectedDay.subtract(Duration(days: _selectedDay.weekday - 1));
+    final weekEnd = weekStart.add(const Duration(days: 6));
+    
+    return expenses.where((expense) {
+      return expense.isIncome && 
+             expense.date.isAfter(weekStart.subtract(const Duration(days: 1))) &&
+             expense.date.isBefore(weekEnd.add(const Duration(days: 1)));
+    }).fold(0.0, (sum, expense) => sum + expense.amount);
+  }
+
+  double _getWeekExpense() {
+    final weekStart = _selectedDay.subtract(Duration(days: _selectedDay.weekday - 1));
+    final weekEnd = weekStart.add(const Duration(days: 6));
+    
+    return expenses.where((expense) {
+      return !expense.isIncome && 
+             expense.date.isAfter(weekStart.subtract(const Duration(days: 1))) &&
+             expense.date.isBefore(weekEnd.add(const Duration(days: 1)));
+    }).fold(0.0, (sum, expense) => sum + expense.amount);
+  }
+
+  Widget _buildWeeklyCalendar() {
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.cyan.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // 月份标题
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  DateFormat('yyyy年MM月').format(_focusedDay),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF00BCD4),
+                  ),
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1);
+                        });
+                      },
+                      icon: const Icon(Icons.chevron_left, color: Color(0xFF00BCD4)),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1);
+                        });
+                      },
+                      icon: const Icon(Icons.chevron_right, color: Color(0xFF00BCD4)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // 周历
+          TableCalendar<Expense>(
+            firstDay: DateTime.utc(2020, 1, 1),
+            lastDay: DateTime.utc(2030, 12, 31),
+            focusedDay: _focusedDay,
+            calendarFormat: CalendarFormat.week,
+            eventLoader: _getExpensesForDay,
+            startingDayOfWeek: StartingDayOfWeek.monday,
+            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay;
+              });
+            },
+            onPageChanged: (focusedDay) {
+              _focusedDay = focusedDay;
+            },
+            calendarStyle: CalendarStyle(
+              outsideDaysVisible: false,
+              weekendTextStyle: const TextStyle(color: Color(0xFF00BCD4)),
+              holidayTextStyle: const TextStyle(color: Color(0xFF00BCD4)),
+              selectedDecoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF00BCD4), Color(0xFF4CAF50)],
+                ),
+                shape: BoxShape.circle,
+              ),
+              todayDecoration: BoxDecoration(
+                color: const Color(0xFF00BCD4).withOpacity(0.3),
+                shape: BoxShape.circle,
+              ),
+              markerDecoration: const BoxDecoration(
+                color: Color(0xFF4CAF50),
+                shape: BoxShape.circle,
+              ),
+              markersMaxCount: 3,
+            ),
+            headerStyle: const HeaderStyle(
+              formatButtonVisible: false,
+              titleCentered: false,
+              leftChevronVisible: false,
+              rightChevronVisible: false,
+            ),
+            daysOfWeekStyle: const DaysOfWeekStyle(
+              weekdayStyle: TextStyle(
+                color: Color(0xFF00BCD4),
+                fontWeight: FontWeight.w600,
+              ),
+              weekendStyle: TextStyle(
+                color: Color(0xFF00BCD4),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeeklyStats() {
+    final weekIncome = _getWeekIncome();
+    final weekExpense = _getWeekExpense();
+    final weekBalance = weekIncome - weekExpense;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -65,137 +243,223 @@ class _HomeScreenState extends State<HomeScreen> {
             const Color(0xFF4CAF50),
           ],
         ),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.cyan.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.account_balance_wallet,
-                  color: Colors.white,
-                  size: 28,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '总余额',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              '¥${totalBalance.toStringAsFixed(2)}',
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.calendar_view_week,
                 color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 36,
+                size: 24,
               ),
+              const SizedBox(width: 8),
+              Text(
+                '本周统计',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '¥${weekBalance.toStringAsFixed(2)}',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.trending_up,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '收入',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.arrow_upward,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '收入',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 12,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '¥${totalIncome.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '¥${weekIncome.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.trending_down,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '支出',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.arrow_downward,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '支出',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 12,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '¥${totalExpense.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '¥${weekExpense.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
+  }
+
+  Widget _buildDayExpenses() {
+    final dayExpenses = _getExpensesForDay(_selectedDay);
+    final dayIncome = _getDayIncome(_selectedDay);
+    final dayExpense = _getDayExpense(_selectedDay);
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.cyan.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _formatSelectedDate(),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF00BCD4),
+                  ),
+                ),
+                if (dayExpenses.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00BCD4).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '收入 ¥${dayIncome.toStringAsFixed(2)} | 支出 ¥${dayExpense.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF00BCD4),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          if (dayExpenses.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(32),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.event_available,
+                      size: 48,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '这一天还没有记录',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            ...dayExpenses.map((expense) => _buildExpenseItem(expense)),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
+  String _formatSelectedDate() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final selectedDate = DateTime(_selectedDay.year, _selectedDay.month, _selectedDay.day);
+
+    if (selectedDate == today) {
+      return '今天';
+    } else if (selectedDate == yesterday) {
+      return '昨天';
+    } else {
+      return DateFormat('MM月dd日 EEEE').format(_selectedDay);
+    }
   }
 
   Widget _buildExpenseList() {
@@ -509,7 +773,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (targetDate == yesterday) {
       return '昨天';
     } else {
-      return DateFormat('MM月dd日 EEEE', 'zh_CN').format(date);
+      return DateFormat('MM月dd日 EEEE').format(date);
     }
   }
 
@@ -626,11 +890,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             )
-          : Column(
-              children: [
-                _buildSummaryCard(),
-                Expanded(child: _buildExpenseList()),
-              ],
+          : FadeTransition(
+              opacity: _fadeAnimation,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    _buildWeeklyStats(),
+                    _buildWeeklyCalendar(),
+                    _buildDayExpenses(),
+                    const SizedBox(height: 80), // 为FAB留出空间
+                  ],
+                ),
+              ),
             ),
       floatingActionButton: Container(
         decoration: BoxDecoration(

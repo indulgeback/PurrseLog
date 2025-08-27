@@ -10,7 +10,8 @@ class AddExpenseScreen extends StatefulWidget {
   State<AddExpenseScreen> createState() => _AddExpenseScreenState();
 }
 
-class _AddExpenseScreenState extends State<AddExpenseScreen> {
+class _AddExpenseScreenState extends State<AddExpenseScreen> 
+    with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
@@ -18,6 +19,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   String _selectedCategory = '餐饮';
   bool _isIncome = false;
   DateTime _selectedDate = DateTime.now();
+  
+  late AnimationController _slideController;
+  late AnimationController _fadeController;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
 
   final List<String> _expenseCategories = [
     '餐饮', '交通', '购物', '娱乐', '医疗', '教育', '住房', '其他'
@@ -28,7 +35,52 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+    
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeInOut,
+    ));
+    
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutBack,
+    ));
+    
+    // 启动动画
+    _slideController.forward();
+    _fadeController.forward();
+  }
+
+  @override
   void dispose() {
+    _slideController.dispose();
+    _fadeController.dispose();
     _titleController.dispose();
     _amountController.dispose();
     super.dispose();
@@ -118,183 +170,249 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           child: Column(
             children: [
               // 收入/支出切换
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.cyan.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+              SlideTransition(
+                position: _slideAnimation,
+                child: ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.cyan.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => _isIncome = false),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          decoration: BoxDecoration(
-                            gradient: !_isIncome 
-                              ? const LinearGradient(
-                                  colors: [Color(0xFF00BCD4), Color(0xFF26C6DA)],
-                                )
-                              : null,
-                            color: !_isIncome ? null : Colors.transparent,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.trending_down,
-                                color: !_isIncome ? Colors.white : Colors.grey,
-                                size: 20,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() => _isIncome = false);
+                              // 添加触觉反馈
+                              // HapticFeedback.lightImpact();
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOutCubic,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              decoration: BoxDecoration(
+                                gradient: !_isIncome 
+                                  ? const LinearGradient(
+                                      colors: [Color(0xFF00BCD4), Color(0xFF26C6DA)],
+                                    )
+                                  : null,
+                                color: !_isIncome ? null : Colors.transparent,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: !_isIncome ? [
+                                  BoxShadow(
+                                    color: const Color(0xFF00BCD4).withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ] : null,
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                '支出',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: !_isIncome ? Colors.white : Colors.grey,
-                                  fontWeight: !_isIncome ? FontWeight.bold : FontWeight.normal,
-                                  fontSize: 16,
-                                ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  AnimatedRotation(
+                                    turns: !_isIncome ? 0.0 : 0.1,
+                                    duration: const Duration(milliseconds: 300),
+                                    child: Icon(
+                                      Icons.trending_down,
+                                      color: !_isIncome ? Colors.white : Colors.grey,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  AnimatedDefaultTextStyle(
+                                    duration: const Duration(milliseconds: 300),
+                                    style: TextStyle(
+                                      color: !_isIncome ? Colors.white : Colors.grey,
+                                      fontWeight: !_isIncome ? FontWeight.bold : FontWeight.normal,
+                                      fontSize: 16,
+                                    ),
+                                    child: const Text('支出'),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => _isIncome = true),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          decoration: BoxDecoration(
-                            gradient: _isIncome 
-                              ? const LinearGradient(
-                                  colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)],
-                                )
-                              : null,
-                            color: _isIncome ? null : Colors.transparent,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.trending_up,
-                                color: _isIncome ? Colors.white : Colors.grey,
-                                size: 20,
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() => _isIncome = true);
+                              // 添加触觉反馈
+                              // HapticFeedback.lightImpact();
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOutCubic,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              decoration: BoxDecoration(
+                                gradient: _isIncome 
+                                  ? const LinearGradient(
+                                      colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)],
+                                    )
+                                  : null,
+                                color: _isIncome ? null : Colors.transparent,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: _isIncome ? [
+                                  BoxShadow(
+                                    color: const Color(0xFF4CAF50).withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ] : null,
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                '收入',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: _isIncome ? Colors.white : Colors.grey,
-                                  fontWeight: _isIncome ? FontWeight.bold : FontWeight.normal,
-                                  fontSize: 16,
-                                ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  AnimatedRotation(
+                                    turns: _isIncome ? 0.0 : 0.1,
+                                    duration: const Duration(milliseconds: 300),
+                                    child: Icon(
+                                      Icons.trending_up,
+                                      color: _isIncome ? Colors.white : Colors.grey,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  AnimatedDefaultTextStyle(
+                                    duration: const Duration(milliseconds: 300),
+                                    style: TextStyle(
+                                      color: _isIncome ? Colors.white : Colors.grey,
+                                      fontWeight: _isIncome ? FontWeight.bold : FontWeight.normal,
+                                      fontSize: 16,
+                                    ),
+                                    child: const Text('收入'),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
               
               const SizedBox(height: 24),
               
               // 标题输入
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.cyan.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: TextFormField(
-                  controller: _titleController,
-                  decoration: InputDecoration(
-                    labelText: '描述',
-                    prefixIcon: Icon(
-                      Icons.edit_outlined,
-                      color: const Color(0xFF00BCD4),
-                    ),
-                    border: OutlineInputBorder(
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.1),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(
+                    parent: _slideController,
+                    curve: const Interval(0.1, 0.6, curve: Curves.easeOut),
+                  )),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.cyan.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                    filled: true,
-                    fillColor: Colors.white,
-                    labelStyle: TextStyle(color: Colors.grey[600]),
+                    child: TextFormField(
+                      controller: _titleController,
+                      decoration: InputDecoration(
+                        labelText: '描述',
+                        prefixIcon: Icon(
+                          Icons.edit_outlined,
+                          color: const Color(0xFF00BCD4),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        labelStyle: TextStyle(color: Colors.grey[600]),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入描述';
+                        }
+                        return null;
+                      },
+                    ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return '请输入描述';
-                    }
-                    return null;
-                  },
                 ),
               ),
               
               const SizedBox(height: 16),
               
               // 金额输入
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.cyan.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: TextFormField(
-                  controller: _amountController,
-                  decoration: InputDecoration(
-                    labelText: '金额',
-                    prefixIcon: Icon(
-                      Icons.attach_money,
-                      color: _isIncome ? const Color(0xFF4CAF50) : const Color(0xFF00BCD4),
-                    ),
-                    prefixText: '¥ ',
-                    border: OutlineInputBorder(
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.1),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(
+                    parent: _slideController,
+                    curve: const Interval(0.2, 0.7, curve: Curves.easeOut),
+                  )),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.cyan.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                    filled: true,
-                    fillColor: Colors.white,
-                    labelStyle: TextStyle(color: Colors.grey[600]),
+                    child: TextFormField(
+                      controller: _amountController,
+                      decoration: InputDecoration(
+                        labelText: '金额',
+                        prefixIcon: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child: Icon(
+                            Icons.attach_money,
+                            key: ValueKey(_isIncome),
+                            color: _isIncome ? const Color(0xFF4CAF50) : const Color(0xFF00BCD4),
+                          ),
+                        ),
+                        prefixText: '¥ ',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        labelStyle: TextStyle(color: Colors.grey[600]),
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入金额';
+                        }
+                        if (double.tryParse(value) == null) {
+                          return '请输入有效的金额';
+                        }
+                        return null;
+                      },
+                    ),
                   ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return '请输入金额';
-                    }
-                    if (double.tryParse(value) == null) {
-                      return '请输入有效的金额';
-                    }
-                    return null;
-                  },
                 ),
               ),
               
