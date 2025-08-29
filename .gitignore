@@ -50,3 +50,6 @@ app.*.map.json
 
 # Version management
 # .version_history should be tracked
+
+# Release builds
+android_release/

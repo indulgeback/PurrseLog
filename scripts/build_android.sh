@@ -49,8 +49,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "🔨 Building APK..."
     flutter build apk --release
     
-    # 重命名 APK 文件
-    APK_NAME="PurrseLog-v${NEW_VERSION}.apk"
+    # 重命名并移动 APK 文件到发布文件夹
+    APK_NAME="android_release/PurrseLog-v${NEW_VERSION}.apk"
     cp build/app/outputs/flutter-apk/app-release.apk "$APK_NAME"
     
     echo "✅ Build completed successfully!"
