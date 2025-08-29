@@ -43,6 +43,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# APK files
+# APK files (keep versioned APKs)
 *.apk
+!PurrseLog-v*.apk
 *.aab
+
+# Version management
+# .version_history should be tracked
