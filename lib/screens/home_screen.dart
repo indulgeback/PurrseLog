@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../models/expense.dart';
 import '../services/storage_service.dart';
 import 'add_expense_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -849,8 +850,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         actions: [
           IconButton(
-            onPressed: () {
-              // 可以添加设置页面
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+              
+              // 如果从设置页面返回且清除了数据，重新加载
+              if (result == true) {
+                _loadExpenses();
+              }
             },
             icon: Container(
               padding: const EdgeInsets.all(8),

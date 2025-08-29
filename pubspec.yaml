@@ -3,7 +3,7 @@ description: PurrseLog - 一个可爱的记账应用
 
 publish_to: "none"
 
-version: 1.2.1+4
+version: 1.3.0+5
 
 environment:
   sdk: ">=3.0.0 <4.0.0"

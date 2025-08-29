@@ -34,4 +34,9 @@ class StorageService {
     expenses.removeWhere((expense) => expense.id == id);
     await saveExpenses(expenses);
   }
+
+  static Future<void> clearAllData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+  }
 }
