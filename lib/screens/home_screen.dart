@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../models/expense.dart';
 import '../services/storage_service.dart';
 import 'add_expense_screen.dart';
@@ -474,10 +475,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 color: const Color(0xFFE0F7FA),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.pets,
-                size: 64,
-                color: Color(0xFF00BCD4),
+              child: SvgPicture.asset(
+                'assets/icon.svg',
+                width: 64,
+                height: 64,
+                colorFilter: const ColorFilter.mode(Color(0xFF00BCD4), BlendMode.srcIn),
               ),
             ),
             const SizedBox(height: 24),
@@ -822,7 +824,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 color: Colors.white.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Text('🐱', style: TextStyle(fontSize: 20)),
+              child: SvgPicture.asset(
+                'assets/icon.svg',
+                width: 24,
+                height: 24,
+                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              ),
             ),
             const SizedBox(width: 12),
             const Text('PurrseLog'),
