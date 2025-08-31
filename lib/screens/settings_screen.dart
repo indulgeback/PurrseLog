@@ -22,15 +22,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     try {
       await StorageService.clearAllData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Row(
+            content: const Row(
               children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 8),
-                const Text('所有数据已清除'),
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 8),
+                Text('所有数据已清除'),
               ],
             ),
             backgroundColor: const Color(0xFF4CAF50),
@@ -40,7 +40,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         );
-        
+
         // 延迟一下再返回，让用户看到成功提示
         await Future.delayed(const Duration(milliseconds: 1500));
         if (mounted) {
@@ -77,116 +77,117 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<bool> _showConfirmDialog() async {
     return await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.warning_amber_rounded,
-                  color: Colors.red,
-                  size: 24,
-                ),
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(width: 12),
-              const Text('确认清除数据'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                '此操作将永久删除所有记账数据，包括：',
-                style: TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Colors.red.withOpacity(0.2),
-                    width: 1,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildWarningItem('• 所有收入记录'),
-                    _buildWarningItem('• 所有支出记录'),
-                    _buildWarningItem('• 历史统计数据'),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.info_outline,
-                      color: Colors.orange,
-                      size: 20,
+              title: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '此操作无法撤销，请谨慎操作！',
-                        style: TextStyle(
-                          color: Colors.orange.shade700,
-                          fontWeight: FontWeight.w500,
-                        ),
+                    child: const Icon(
+                      Icons.warning_amber_rounded,
+                      color: Colors.red,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text('确认清除数据'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '此操作将永久删除所有记账数据，包括：',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.red.withValues(alpha: 0.2),
+                        width: 1,
                       ),
                     ),
-                  ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildWarningItem('• 所有收入记录'),
+                        _buildWarningItem('• 所有支出记录'),
+                        _buildWarningItem('• 历史统计数据'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          color: Colors.orange,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '此操作无法撤销，请谨慎操作！',
+                            style: TextStyle(
+                              color: Colors.orange.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(
+                    '取消',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(
-                '取消',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w500,
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    '确认清除',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
                 ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text(
-                '确认清除',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-          ],
-        );
-      },
-    ) ?? false;
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 
   Widget _buildWarningItem(String text) {
@@ -216,16 +217,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Card(
         elevation: 2,
-        shadowColor: Colors.cyan.withOpacity(0.1),
+        shadowColor: Colors.cyan.withValues(alpha: 0.1),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
         child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           leading: Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: (iconColor ?? const Color(0xFF00BCD4)).withOpacity(0.1),
+              color:
+                  (iconColor ?? const Color(0xFF00BCD4)).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: isLoading
@@ -283,7 +286,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -313,7 +316,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
@@ -328,7 +331,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
-            
+
             // 应用信息
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -338,13 +341,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    const Color(0xFF00BCD4).withOpacity(0.1),
-                    const Color(0xFF4CAF50).withOpacity(0.1),
+                    const Color(0xFF00BCD4).withValues(alpha: 0.1),
+                    const Color(0xFF4CAF50).withValues(alpha: 0.1),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: const Color(0xFF00BCD4).withOpacity(0.2),
+                  color: const Color(0xFF00BCD4).withValues(alpha: 0.2),
                   width: 1,
                 ),
               ),
@@ -357,7 +360,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.cyan.withOpacity(0.2),
+                          color: Colors.cyan.withValues(alpha: 0.2),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -401,7 +404,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF4CAF50).withOpacity(0.2),
+                            color:
+                                const Color(0xFF4CAF50).withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: const Text(
@@ -471,7 +475,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.cyan.withOpacity(0.1),
+                    color: Colors.cyan.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),

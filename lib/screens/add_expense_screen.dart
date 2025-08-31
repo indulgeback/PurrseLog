@@ -180,153 +180,87 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                 child: ScaleTransition(
                   scale: _scaleAnimation,
                   child: Container(
-                    padding: const EdgeInsets.all(4),
+                    width: double.infinity,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.cyan.withValues(alpha: 0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() => _isIncome = false);
-                              // 添加触觉反馈
-                              // HapticFeedback.lightImpact();
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: SegmentedButton<bool>(
+                        segments: const [
+                          ButtonSegment<bool>(
+                            value: false,
+                            label: Text('支出'),
+                            icon: Icon(Icons.trending_down),
+                          ),
+                          ButtonSegment<bool>(
+                            value: true,
+                            label: Text('收入'),
+                            icon: Icon(Icons.trending_up),
+                          ),
+                        ],
+                        selected: {_isIncome},
+                        onSelectionChanged: (Set<bool> selection) {
+                          setState(() {
+                            _isIncome = selection.first;
+                          });
+                        },
+                        style: ButtonStyle(
+                          backgroundColor:
+                              WidgetStateProperty.resolveWith<Color>(
+                            (Set<WidgetState> states) {
+                              if (states.contains(WidgetState.selected)) {
+                                return _isIncome
+                                    ? const Color(0xFF4CAF50)
+                                    : const Color(0xFF00BCD4);
+                              }
+                              return Colors.transparent;
                             },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOutCubic,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              decoration: BoxDecoration(
-                                gradient: !_isIncome
-                                    ? const LinearGradient(
-                                        colors: [
-                                          Color(0xFF00BCD4),
-                                          Color(0xFF26C6DA)
-                                        ],
-                                      )
-                                    : null,
-                                color: !_isIncome ? null : Colors.transparent,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: !_isIncome
-                                    ? [
-                                        BoxShadow(
-                                          color: const Color(0xFF00BCD4)
-                                              .withValues(alpha: 0.3),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ]
-                                    : null,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  AnimatedRotation(
-                                    turns: !_isIncome ? 0.0 : 0.1,
-                                    duration: const Duration(milliseconds: 300),
-                                    child: Icon(
-                                      Icons.trending_down,
-                                      color: !_isIncome
-                                          ? Colors.white
-                                          : Colors.grey,
-                                      size: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  AnimatedDefaultTextStyle(
-                                    duration: const Duration(milliseconds: 300),
-                                    style: TextStyle(
-                                      color: !_isIncome
-                                          ? Colors.white
-                                          : Colors.grey,
-                                      fontWeight: !_isIncome
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                      fontSize: 16,
-                                    ),
-                                    child: const Text('支出'),
-                                  ),
-                                ],
-                              ),
+                          ),
+                          foregroundColor:
+                              WidgetStateProperty.resolveWith<Color>(
+                            (Set<WidgetState> states) {
+                              if (states.contains(WidgetState.selected)) {
+                                return Colors.white;
+                              }
+                              return Colors.grey.shade600;
+                            },
+                          ),
+                          side: WidgetStateProperty.resolveWith<BorderSide>(
+                            (Set<WidgetState> states) {
+                              if (states.contains(WidgetState.selected)) {
+                                return BorderSide(
+                                  color: _isIncome
+                                      ? const Color(0xFF4CAF50)
+                                      : const Color(0xFF00BCD4),
+                                  width: 2,
+                                );
+                              }
+                              return BorderSide(
+                                color: Colors.grey.shade300,
+                                width: 1,
+                              );
+                            },
+                          ),
+                          shape: WidgetStateProperty.all(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                        ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() => _isIncome = true);
-                              // 添加触觉反馈
-                              // HapticFeedback.lightImpact();
-                            },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOutCubic,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              decoration: BoxDecoration(
-                                gradient: _isIncome
-                                    ? const LinearGradient(
-                                        colors: [
-                                          Color(0xFF4CAF50),
-                                          Color(0xFF66BB6A)
-                                        ],
-                                      )
-                                    : null,
-                                color: _isIncome ? null : Colors.transparent,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: _isIncome
-                                    ? [
-                                        BoxShadow(
-                                          color: const Color(0xFF4CAF50)
-                                              .withValues(alpha: 0.3),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ]
-                                    : null,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  AnimatedRotation(
-                                    turns: _isIncome ? 0.0 : 0.1,
-                                    duration: const Duration(milliseconds: 300),
-                                    child: Icon(
-                                      Icons.trending_up,
-                                      color: _isIncome
-                                          ? Colors.white
-                                          : Colors.grey,
-                                      size: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  AnimatedDefaultTextStyle(
-                                    duration: const Duration(milliseconds: 300),
-                                    style: TextStyle(
-                                      color: _isIncome
-                                          ? Colors.white
-                                          : Colors.grey,
-                                      fontWeight: _isIncome
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                      fontSize: 16,
-                                    ),
-                                    child: const Text('收入'),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          padding: WidgetStateProperty.all(
+                            const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),

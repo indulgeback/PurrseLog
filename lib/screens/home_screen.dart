@@ -79,6 +79,90 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }).toList();
   }
 
+  Widget _buildCalendarDay(DateTime day, bool isSelected, bool isToday) {
+    final dayExpenses = _getExpensesForDay(day);
+    final hasExpenses = dayExpenses.isNotEmpty;
+    final expenseCount = dayExpenses.length;
+
+    return Container(
+      margin: const EdgeInsets.all(4),
+      child: Stack(
+        clipBehavior: Clip.none, // 允许子组件超出边界
+        children: [
+          // 日期圆圈背景
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              gradient: isSelected
+                  ? const LinearGradient(
+                      colors: [Color(0xFF00BCD4), Color(0xFF4CAF50)],
+                    )
+                  : null,
+              color: isSelected
+                  ? null
+                  : isToday
+                      ? const Color(0xFF00BCD4).withValues(alpha: 0.3)
+                      : null,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                '${day.day}',
+                style: TextStyle(
+                  color: isSelected
+                      ? Colors.white
+                      : isToday
+                          ? const Color(0xFF00BCD4)
+                          : Colors.black87,
+                  fontWeight: isSelected || isToday
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+          // 记录数量标记 - 位于右上角
+          if (hasExpenses)
+            Positioned(
+              top: -3,
+              right: -3,
+              child: Container(
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF6B35), // 使用橙色，避免与蓝绿色冲突
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white,
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF6B35).withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    expenseCount > 9 ? '9+' : '$expenseCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _showMonthPicker() async {
     await showDialog(
       context: context,
@@ -354,153 +438,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-  Widget _buildExpenseList() {
-    if (expenses.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE0F7FA),
-                shape: BoxShape.circle,
-              ),
-              child: SvgPicture.asset(
-                'assets/icon.svg',
-                width: 64,
-                height: 64,
-                colorFilter: const ColorFilter.mode(Color(0xFF00BCD4), BlendMode.srcIn),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              '小猫咪的钱包还是空的呢 🐱',
-              style: TextStyle(
-                fontSize: 20,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              '点击右下角的 + 号开始记账吧！',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[500],
-              ),
-            ),
-            const SizedBox(height: 32),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    const Color(0xFF00BCD4).withOpacity(0.1),
-                    const Color(0xFF4CAF50).withOpacity(0.1),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                '✨ 开始你的理财之旅 ✨',
-                style: TextStyle(
-                  color: const Color(0xFF00BCD4),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // 按日期分组
-    final groupedExpenses = <String, List<Expense>>{};
-    for (final expense in expenses) {
-      final dateKey = DateFormat('yyyy-MM-dd').format(expense.date);
-      groupedExpenses.putIfAbsent(dateKey, () => []).add(expense);
-    }
-
-    // 按日期排序（最新的在前）
-    final sortedDates = groupedExpenses.keys.toList()
-      ..sort((a, b) => b.compareTo(a));
-
-    return ListView.builder(
-      itemCount: sortedDates.length,
-      itemBuilder: (context, index) {
-        final date = sortedDates[index];
-        final dayExpenses = groupedExpenses[date]!;
-        
-        // 计算当日收支
-        final dayIncome = dayExpenses
-            .where((e) => e.isIncome)
-            .fold(0.0, (sum, e) => sum + e.amount);
-        final dayExpense = dayExpenses
-            .where((e) => !e.isIncome)
-            .fold(0.0, (sum, e) => sum + e.amount);
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    const Color(0xFF00BCD4).withOpacity(0.1),
-                    const Color(0xFF4CAF50).withOpacity(0.1),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_today,
-                        size: 16,
-                        color: const Color(0xFF00BCD4),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        _formatDate(DateTime.parse(date)),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF00BCD4),
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.8),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '收入 ¥${dayIncome.toStringAsFixed(2)} | 支出 ¥${dayExpense.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade700,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ...dayExpenses.map((expense) => _buildExpenseItem(expense)),
-          ],
-        );
-      },
-    );
-  }
-
   Widget _buildExpenseItem(Expense expense) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -669,7 +606,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 'assets/icon.svg',
                 width: 24,
                 height: 24,
-                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                colorFilter:
+                    const ColorFilter.mode(Colors.white, BlendMode.srcIn),
               ),
             ),
             const SizedBox(width: 12),
@@ -697,7 +635,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   builder: (context) => const SettingsScreen(),
                 ),
               );
-              
+
               // 如果从设置页面返回且清除了数据，重新加载
               if (result == true) {
                 _loadExpenses();
@@ -706,7 +644,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
@@ -858,6 +796,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           _focusedDay = focusedDay;
                         });
                       },
+                      calendarBuilders: CalendarBuilders(
+                        defaultBuilder: (context, day, focusedDay) {
+                          return _buildCalendarDay(day, false, false);
+                        },
+                        selectedBuilder: (context, day, focusedDay) {
+                          return _buildCalendarDay(day, true, false);
+                        },
+                        todayBuilder: (context, day, focusedDay) {
+                          return _buildCalendarDay(day, false, true);
+                        },
+                      ),
                       calendarStyle: CalendarStyle(
                         outsideDaysVisible: false,
                         selectedDecoration: const BoxDecoration(
@@ -870,10 +819,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           color: const Color(0xFF00BCD4).withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                         ),
+                        // 隐藏默认的标记，我们用自定义的
                         markerDecoration: const BoxDecoration(
-                          color: Color(0xFF4CAF50),
+                          color: Colors.transparent,
                           shape: BoxShape.circle,
                         ),
+                        markersMaxCount: 0,
                       ),
                     ),
                   ),
@@ -952,6 +903,93 @@ class _CalendarPickerState extends State<_CalendarPicker> {
     return widget.expenses.where((expense) {
       return isSameDay(expense.date, day);
     }).toList();
+  }
+
+  Widget _buildPopupCalendarDay(
+      DateTime day, bool isSelected, bool isToday, bool isOutside) {
+    final dayExpenses = _getExpensesForDay(day);
+    final hasExpenses = dayExpenses.isNotEmpty;
+    final expenseCount = dayExpenses.length;
+
+    return Container(
+      margin: const EdgeInsets.all(2),
+      child: Stack(
+        clipBehavior: Clip.none, // 允许子组件超出边界
+        children: [
+          // 日期圆圈背景
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              gradient: isSelected
+                  ? const LinearGradient(
+                      colors: [Color(0xFF00BCD4), Color(0xFF4CAF50)],
+                    )
+                  : null,
+              color: isSelected
+                  ? null
+                  : isToday
+                      ? const Color(0xFF00BCD4).withValues(alpha: 0.3)
+                      : null,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                '${day.day}',
+                style: TextStyle(
+                  color: isSelected
+                      ? Colors.white
+                      : isToday
+                          ? const Color(0xFF00BCD4)
+                          : isOutside
+                              ? Colors.grey.withValues(alpha: 0.6)
+                              : Colors.black87,
+                  fontWeight: isSelected || isToday
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+          // 记录数量标记 - 位于右上角
+          if (hasExpenses)
+            Positioned(
+              top: -4,
+              right: -4,
+              child: Container(
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF6B35), // 使用橙色
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white,
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF6B35).withValues(alpha: 0.3),
+                      blurRadius: 3,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    expenseCount > 9 ? '9+' : '$expenseCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -1055,6 +1093,20 @@ class _CalendarPickerState extends State<_CalendarPicker> {
                 _focusedDay = focusedDay;
               });
             },
+            calendarBuilders: CalendarBuilders(
+              defaultBuilder: (context, day, focusedDay) {
+                return _buildPopupCalendarDay(day, false, false, false);
+              },
+              selectedBuilder: (context, day, focusedDay) {
+                return _buildPopupCalendarDay(day, true, false, false);
+              },
+              todayBuilder: (context, day, focusedDay) {
+                return _buildPopupCalendarDay(day, false, true, false);
+              },
+              outsideBuilder: (context, day, focusedDay) {
+                return _buildPopupCalendarDay(day, false, false, true);
+              },
+            ),
             calendarStyle: CalendarStyle(
               outsideDaysVisible: true,
               weekendTextStyle: const TextStyle(
@@ -1075,12 +1127,12 @@ class _CalendarPickerState extends State<_CalendarPicker> {
                 color: const Color(0xFF00BCD4).withValues(alpha: 0.3),
                 shape: BoxShape.circle,
               ),
+              // 隐藏默认标记
               markerDecoration: const BoxDecoration(
-                color: Color(0xFF4CAF50),
+                color: Colors.transparent,
                 shape: BoxShape.circle,
               ),
-              markersMaxCount: 3,
-              markerSize: 6,
+              markersMaxCount: 0,
               outsideTextStyle: TextStyle(
                 color: Colors.grey.withValues(alpha: 0.6),
               ),
