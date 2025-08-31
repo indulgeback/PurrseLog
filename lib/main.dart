@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'models/expense.dart';
-import 'services/storage_service.dart';
-import 'screens/home_screen.dart';
+import './screens/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,11 +25,11 @@ class PurrseLogApp extends StatelessWidget {
           secondary: const Color(0xFF4CAF50), // 绿色
           tertiary: const Color(0xFF2196F3), // 蓝色
           surface: const Color(0xFFF0FDFF), // 浅青色背景
-          surfaceVariant: const Color(0xFFE0F7FA), // 更浅的青色
+          surfaceContainerHighest: const Color(0xFFE0F7FA), // 更浅的青色
         ),
         cardTheme: CardThemeData(
           elevation: 8,
-          shadowColor: Colors.cyan.withOpacity(0.3),
+          shadowColor: Colors.cyan.withValues(alpha: 0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -57,7 +54,7 @@ class PurrseLogApp extends StatelessWidget {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             elevation: 8,
-            shadowColor: Colors.cyan.withOpacity(0.3),
+            shadowColor: Colors.cyan.withValues(alpha: 0.3),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),

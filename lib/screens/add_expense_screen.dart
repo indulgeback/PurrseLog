@@ -10,16 +10,16 @@ class AddExpenseScreen extends StatefulWidget {
   State<AddExpenseScreen> createState() => _AddExpenseScreenState();
 }
 
-class _AddExpenseScreenState extends State<AddExpenseScreen> 
+class _AddExpenseScreenState extends State<AddExpenseScreen>
     with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
-  
+
   String _selectedCategory = '餐饮';
   bool _isIncome = false;
   DateTime _selectedDate = DateTime.now();
-  
+
   late AnimationController _slideController;
   late AnimationController _fadeController;
   late Animation<Offset> _slideAnimation;
@@ -27,27 +27,32 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
   late Animation<double> _scaleAnimation;
 
   final List<String> _expenseCategories = [
-    '餐饮', '交通', '购物', '娱乐', '医疗', '教育', '住房', '其他'
+    '餐饮',
+    '交�?',
+    '购物',
+    '娱乐',
+    '医疗',
+    '教育',
+    '住房',
+    '其他'
   ];
 
-  final List<String> _incomeCategories = [
-    '工资', '奖金', '投资', '兼职', '礼金', '其他'
-  ];
+  final List<String> _incomeCategories = ['工资', '奖金', '投资', '兼职', '礼金', '其他'];
 
   @override
   void initState() {
     super.initState();
-    
+
     _slideController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    
+
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
@@ -55,7 +60,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
       parent: _slideController,
       curve: Curves.easeOutCubic,
     ));
-    
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -63,7 +68,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
       parent: _fadeController,
       curve: Curves.easeInOut,
     ));
-    
+
     _scaleAnimation = Tween<double>(
       begin: 0.8,
       end: 1.0,
@@ -71,7 +76,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
       parent: _slideController,
       curve: Curves.easeOutBack,
     ));
-    
+
     // 启动动画
     _slideController.forward();
     _fadeController.forward();
@@ -112,7 +117,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
       );
 
       await StorageService.addExpense(expense);
-      
+
       if (mounted) {
         Navigator.pop(context);
       }
@@ -122,7 +127,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
   @override
   Widget build(BuildContext context) {
     final categories = _isIncome ? _incomeCategories : _expenseCategories;
-    
+
     return Scaffold(
       backgroundColor: const Color(0xFFF0FDFF),
       appBar: AppBar(
@@ -142,9 +147,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: _isIncome 
-                ? [const Color(0xFF4CAF50), const Color(0xFF66BB6A)]
-                : [const Color(0xFF00BCD4), const Color(0xFF26C6DA)],
+              colors: _isIncome
+                  ? [const Color(0xFF4CAF50), const Color(0xFF66BB6A)]
+                  : [const Color(0xFF00BCD4), const Color(0xFF26C6DA)],
             ),
           ),
         ),
@@ -153,7 +158,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
@@ -181,7 +186,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.cyan.withOpacity(0.1),
+                          color: Colors.cyan.withValues(alpha: 0.1),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -201,20 +206,26 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                               curve: Curves.easeInOutCubic,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               decoration: BoxDecoration(
-                                gradient: !_isIncome 
-                                  ? const LinearGradient(
-                                      colors: [Color(0xFF00BCD4), Color(0xFF26C6DA)],
-                                    )
-                                  : null,
+                                gradient: !_isIncome
+                                    ? const LinearGradient(
+                                        colors: [
+                                          Color(0xFF00BCD4),
+                                          Color(0xFF26C6DA)
+                                        ],
+                                      )
+                                    : null,
                                 color: !_isIncome ? null : Colors.transparent,
                                 borderRadius: BorderRadius.circular(12),
-                                boxShadow: !_isIncome ? [
-                                  BoxShadow(
-                                    color: const Color(0xFF00BCD4).withOpacity(0.3),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ] : null,
+                                boxShadow: !_isIncome
+                                    ? [
+                                        BoxShadow(
+                                          color: const Color(0xFF00BCD4)
+                                              .withValues(alpha: 0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ]
+                                    : null,
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -224,7 +235,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                                     duration: const Duration(milliseconds: 300),
                                     child: Icon(
                                       Icons.trending_down,
-                                      color: !_isIncome ? Colors.white : Colors.grey,
+                                      color: !_isIncome
+                                          ? Colors.white
+                                          : Colors.grey,
                                       size: 20,
                                     ),
                                   ),
@@ -232,8 +245,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                                   AnimatedDefaultTextStyle(
                                     duration: const Duration(milliseconds: 300),
                                     style: TextStyle(
-                                      color: !_isIncome ? Colors.white : Colors.grey,
-                                      fontWeight: !_isIncome ? FontWeight.bold : FontWeight.normal,
+                                      color: !_isIncome
+                                          ? Colors.white
+                                          : Colors.grey,
+                                      fontWeight: !_isIncome
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
                                       fontSize: 16,
                                     ),
                                     child: const Text('支出'),
@@ -255,20 +272,26 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                               curve: Curves.easeInOutCubic,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               decoration: BoxDecoration(
-                                gradient: _isIncome 
-                                  ? const LinearGradient(
-                                      colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)],
-                                    )
-                                  : null,
+                                gradient: _isIncome
+                                    ? const LinearGradient(
+                                        colors: [
+                                          Color(0xFF4CAF50),
+                                          Color(0xFF66BB6A)
+                                        ],
+                                      )
+                                    : null,
                                 color: _isIncome ? null : Colors.transparent,
                                 borderRadius: BorderRadius.circular(12),
-                                boxShadow: _isIncome ? [
-                                  BoxShadow(
-                                    color: const Color(0xFF4CAF50).withOpacity(0.3),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ] : null,
+                                boxShadow: _isIncome
+                                    ? [
+                                        BoxShadow(
+                                          color: const Color(0xFF4CAF50)
+                                              .withValues(alpha: 0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ]
+                                    : null,
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -278,7 +301,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                                     duration: const Duration(milliseconds: 300),
                                     child: Icon(
                                       Icons.trending_up,
-                                      color: _isIncome ? Colors.white : Colors.grey,
+                                      color: _isIncome
+                                          ? Colors.white
+                                          : Colors.grey,
                                       size: 20,
                                     ),
                                   ),
@@ -286,8 +311,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                                   AnimatedDefaultTextStyle(
                                     duration: const Duration(milliseconds: 300),
                                     style: TextStyle(
-                                      color: _isIncome ? Colors.white : Colors.grey,
-                                      fontWeight: _isIncome ? FontWeight.bold : FontWeight.normal,
+                                      color: _isIncome
+                                          ? Colors.white
+                                          : Colors.grey,
+                                      fontWeight: _isIncome
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
                                       fontSize: 16,
                                     ),
                                     child: const Text('收入'),
@@ -302,9 +331,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // 标题输入
               FadeTransition(
                 opacity: _fadeAnimation,
@@ -322,7 +351,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.cyan.withOpacity(0.1),
+                          color: Colors.cyan.withValues(alpha: 0.1),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -332,9 +361,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                       controller: _titleController,
                       decoration: InputDecoration(
                         labelText: '描述',
-                        prefixIcon: Icon(
+                        prefixIcon: const Icon(
                           Icons.edit_outlined,
-                          color: const Color(0xFF00BCD4),
+                          color: Color(0xFF00BCD4),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -346,7 +375,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return '请输入描述';
+                          return '请输入描�?';
                         }
                         return null;
                       },
@@ -354,9 +383,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // 金额输入
               FadeTransition(
                 opacity: _fadeAnimation,
@@ -374,7 +403,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.cyan.withOpacity(0.1),
+                          color: Colors.cyan.withValues(alpha: 0.1),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -389,7 +418,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                           child: Icon(
                             Icons.attach_money,
                             key: ValueKey(_isIncome),
-                            color: _isIncome ? const Color(0xFF4CAF50) : const Color(0xFF00BCD4),
+                            color: _isIncome
+                                ? const Color(0xFF4CAF50)
+                                : const Color(0xFF00BCD4),
                           ),
                         ),
                         prefixText: '¥ ',
@@ -404,7 +435,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return '请输入金额';
+                          return '请输入金�?';
                         }
                         if (double.tryParse(value) == null) {
                           return '请输入有效的金额';
@@ -415,9 +446,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // 分类选择
               Container(
                 decoration: BoxDecoration(
@@ -425,19 +456,21 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.cyan.withOpacity(0.1),
+                      color: Colors.cyan.withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
                 child: DropdownButtonFormField<String>(
-                  value: categories.contains(_selectedCategory) ? _selectedCategory : categories.first,
+                  initialValue: categories.contains(_selectedCategory)
+                      ? _selectedCategory
+                      : categories.first,
                   decoration: InputDecoration(
                     labelText: '分类',
-                    prefixIcon: Icon(
+                    prefixIcon: const Icon(
                       Icons.category_outlined,
-                      color: const Color(0xFF00BCD4),
+                      color: Color(0xFF00BCD4),
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -460,9 +493,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                   },
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // 日期选择
               Container(
                 decoration: BoxDecoration(
@@ -470,7 +503,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.cyan.withOpacity(0.1),
+                      color: Colors.cyan.withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -482,9 +515,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                   child: InputDecorator(
                     decoration: InputDecoration(
                       labelText: '日期',
-                      prefixIcon: Icon(
+                      prefixIcon: const Icon(
                         Icons.calendar_today_outlined,
-                        color: const Color(0xFF00BCD4),
+                        color: Color(0xFF00BCD4),
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -501,23 +534,26 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // 保存按钮
               Container(
                 width: double.infinity,
                 height: 56,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: _isIncome 
-                      ? [const Color(0xFF4CAF50), const Color(0xFF66BB6A)]
-                      : [const Color(0xFF00BCD4), const Color(0xFF26C6DA)],
+                    colors: _isIncome
+                        ? [const Color(0xFF4CAF50), const Color(0xFF66BB6A)]
+                        : [const Color(0xFF00BCD4), const Color(0xFF26C6DA)],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: (_isIncome ? const Color(0xFF4CAF50) : const Color(0xFF00BCD4)).withOpacity(0.3),
+                      color: (_isIncome
+                              ? const Color(0xFF4CAF50)
+                              : const Color(0xFF00BCD4))
+                          .withValues(alpha: 0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),
@@ -536,7 +572,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        _isIncome ? Icons.add_circle_outline : Icons.remove_circle_outline,
+                        _isIncome
+                            ? Icons.add_circle_outline
+                            : Icons.remove_circle_outline,
                         color: Colors.white,
                         size: 24,
                       ),
