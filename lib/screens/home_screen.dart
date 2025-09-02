@@ -391,32 +391,39 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
           ),
-          if (dayExpenses.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(32),
-              child: Center(
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.event_available,
-                      size: 48,
-                      color: Colors.grey,
-                    ),
-                    SizedBox(height: 12),
-                    Text(
-                      '这一天还没有记录',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 16,
+          Expanded(
+            child: dayExpenses.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.event_available,
+                            size: 48,
+                            color: Colors.grey,
+                          ),
+                          SizedBox(height: 12),
+                          Text(
+                            '这一天还没有记录',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            )
-          else
-            ...dayExpenses.map((expense) => _buildExpenseItem(expense)),
-          const SizedBox(height: 8),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    itemCount: dayExpenses.length,
+                    itemBuilder: (context, index) {
+                      return _buildExpenseItem(dayExpenses[index]);
+                    },
+                  ),
+          ),
         ],
       ),
     );
