@@ -28,7 +28,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
 
   final List<String> _expenseCategories = [
     '餐饮',
-    '交�?',
+    '交通',
     '购物',
     '娱乐',
     '医疗',
