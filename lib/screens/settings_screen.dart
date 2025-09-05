@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../services/storage_service.dart';
+import '../widgets/version_display.dart';
+import '../widgets/decorated_card.dart';
+import '../widgets/animal_icon.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -215,12 +218,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Card(
+      child: SimpleDecoratedCard(
         elevation: 2,
         shadowColor: Colors.cyan.withValues(alpha: 0.1),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        seed: title, // 使用标题作为种子确保一致性
         child: ListTile(
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -335,89 +336,94 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // 应用信息
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    const Color(0xFF00BCD4).withValues(alpha: 0.1),
-                    const Color(0xFF4CAF50).withValues(alpha: 0.1),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xFF00BCD4).withValues(alpha: 0.2),
-                  width: 1,
-                ),
-              ),
-              child: Row(
+              child: Stack(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.cyan.withValues(alpha: 0.2),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: SvgPicture.asset(
-                      'assets/icon.svg',
-                      width: 40,
-                      height: 40,
-                      colorFilter: const ColorFilter.mode(
-                        Color(0xFF00BCD4),
-                        BlendMode.srcIn,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          const Color(0xFF00BCD4).withValues(alpha: 0.1),
+                          const Color(0xFF4CAF50).withValues(alpha: 0.1),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFF00BCD4).withValues(alpha: 0.2),
+                        width: 1,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        const Text(
-                          'PurrseLog',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF00BCD4),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '可爱的记账应用 🐱',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color:
-                                const Color(0xFF4CAF50).withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(6),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.cyan.withValues(alpha: 0.2),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
-                          child: const Text(
-                            'v1.2.1+4',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF4CAF50),
-                              fontWeight: FontWeight.w600,
+                          child: SvgPicture.asset(
+                            'assets/icon.svg',
+                            width: 40,
+                            height: 40,
+                            colorFilter: const ColorFilter.mode(
+                              Color(0xFF00BCD4),
+                              BlendMode.srcIn,
                             ),
                           ),
                         ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'PurrseLog',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF00BCD4),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '可爱的记账应用 🐱',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              const VersionDisplay(
+                                showLoadingState: true,
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
+                    ),
+                  ),
+                  // 装饰性动物图标
+                  const Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Opacity(
+                      opacity: 0.2,
+                      child: const DecorativeAnimalIcon(
+                        size: 36,
+                        // 移除color参数，保持SVG原始颜色
+                        seed: 'app_info',
+                        useRandom: false,
+                        enableAnimation: true, // 启用动画
+                      ),
                     ),
                   ),
                 ],

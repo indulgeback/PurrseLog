@@ -3,7 +3,7 @@ description: PurrseLog - 一个可爱的记账应用
 
 publish_to: "none"
 
-version: 1.4.3+9
+version: 1.5.0+10
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -16,6 +16,7 @@ dependencies:
   intl: ^0.18.1
   table_calendar: ^3.0.9
   flutter_svg: ^2.0.9
+  package_info_plus: ^8.0.2
 
 dev_dependencies:
   flutter_test:

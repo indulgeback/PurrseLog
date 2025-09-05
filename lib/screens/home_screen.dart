@@ -4,6 +4,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../models/expense.dart';
 import '../services/storage_service.dart';
+import '../widgets/animal_icon.dart';
 import 'add_expense_screen.dart';
 import 'settings_screen.dart';
 
@@ -457,20 +458,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         child: ListTile(
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          leading: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: expense.isIncome
-                    ? [const Color(0xFF4CAF50), const Color(0xFF66BB6A)]
-                    : [const Color(0xFF00BCD4), const Color(0xFF26C6DA)],
+          leading: SizedBox(
+            width: 48,
+            height: 48,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: expense.isIncome
+                      ? [const Color(0xFF4CAF50), const Color(0xFF66BB6A)]
+                      : [const Color(0xFF00BCD4), const Color(0xFF26C6DA)],
+                ),
+                borderRadius: BorderRadius.circular(12),
               ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              _getCategoryIcon(expense.category),
-              color: Colors.white,
-              size: 24,
+              child: CategoryAnimalIcon(
+                category: expense.category,
+                isIncome: expense.isIncome,
+                // 移除color参数，保持SVG原始颜色
+                size: 24,
+                enableAnimation: true, // 恢复动画功能
+              ),
             ),
           ),
           title: Text(
@@ -564,36 +571,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  IconData _getCategoryIcon(String category) {
-    switch (category) {
-      case '餐饮':
-        return Icons.restaurant;
-      case '交通':
-        return Icons.directions_car;
-      case '购物':
-        return Icons.shopping_bag;
-      case '娱乐':
-        return Icons.movie;
-      case '医疗':
-        return Icons.local_hospital;
-      case '教育':
-        return Icons.school;
-      case '住房':
-        return Icons.home;
-      case '工资':
-        return Icons.work;
-      case '奖金':
-        return Icons.card_giftcard;
-      case '投资':
-        return Icons.trending_up;
-      case '兼职':
-        return Icons.business_center;
-      case '礼金':
-        return Icons.redeem;
-      default:
-        return Icons.category;
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -675,104 +653,125 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   // 总览卡片
                   Container(
                     margin: const EdgeInsets.all(16),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFF00BCD4),
-                          Color(0xFF4CAF50),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.cyan.withValues(alpha: 0.3),
-                          blurRadius: 15,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Column(
+                    child: Stack(
                       children: [
-                        const Text(
-                          '总余额',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Color(0xFF00BCD4),
+                                Color(0xFF4CAF50),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.cyan.withValues(alpha: 0.3),
+                                blurRadius: 15,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '¥${totalBalance.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
+                          child: Column(
+                            children: [
+                              const Text(
+                                '总余额',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '¥${totalBalance.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
                                 children: [
-                                  const Icon(
-                                    Icons.arrow_upward,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  const Text(
-                                    '收入',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        const Icon(
+                                          Icons.arrow_upward,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        const Text(
+                                          '收入',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '¥${totalIncome.toStringAsFixed(2)}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '¥${totalIncome.toStringAsFixed(2)}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        const Icon(
+                                          Icons.arrow_downward,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        const Text(
+                                          '支出',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '¥${totalExpense.toStringAsFixed(2)}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
+                            ],
+                          ),
+                        ),
+                        // 装饰性动物图标
+                        const Positioned(
+                          top: 12,
+                          right: 12,
+                          child: Opacity(
+                            opacity: 0.3,
+                            child: const DecorativeAnimalIcon(
+                              size: 40,
+                              // 移除color参数，保持SVG原始颜色
+                              seed: 'balance_card', // 使用固定种子确保一致性
+                              useRandom: false,
+                              enableAnimation: true, // 启用动画
                             ),
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  const Icon(
-                                    Icons.arrow_downward,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  const Text(
-                                    '支出',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '¥${totalExpense.toStringAsFixed(2)}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ],
                     ),

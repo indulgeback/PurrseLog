@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import './screens/home_screen.dart';
+import './screens/splash_screen.dart';
+import './services/version_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // 初始化日期格式化
   await initializeDateFormatting('zh_CN', null);
+  
+  // 初始化版本服务
+  await VersionService.initialize();
+  
   runApp(const PurrseLogApp());
 }
 
@@ -61,7 +68,7 @@ class PurrseLogApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const HomeScreen(),
+      home: const SplashScreen(),
     );
   }
 }
